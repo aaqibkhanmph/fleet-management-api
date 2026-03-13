@@ -76,7 +76,7 @@ export const policyService = {
 
     const [rows] = await pool.query(query, params);
     
-    // Aggregate/map results before returning
+    // Map DB snake_case columns to camelCase response
     const results = rows.map(row => ({
       policyNumber: row.policy_number || null,
       system: row.system || null,
@@ -87,20 +87,6 @@ export const policyService = {
       product: row.product || null,
       agentCode: row.agent_code || null
     }));
-
-    // Add dummy data for testing if specifically requested or no results found
-    if (filters.policyNumber && filters.policyNumber.startsWith('POL')) {
-      results.unshift({
-        policyNumber: filters.policyNumber,
-        system: "MOCK-SYSTEM",
-        owner: "John Dummy Doe",
-        dob: "1985-10-25",
-        ssn: "***-**-6789",
-        status: "active",
-        product: "Mock Life Guard",
-        agentCode: "MOCK-AGT-01"
-      });
-    }
 
     return {
       total: results.length,
