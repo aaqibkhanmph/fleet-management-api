@@ -3,16 +3,12 @@ import { policyService } from '../services/policyService.js';
 export const policyController = {
   searchPolicies: async (req, res, next) => {
     try {
-      const { page, pageSize, ...filters } = req.query;
-      
-      const data = await policyService.searchPolicies(filters, { page, pageSize });
+      const data = await policyService.searchPolicies(req.query);
       
       return res.status(200).json({
         success: true,
         data: {
           total: data.total,
-          page,
-          pageSize,
           results: data.results
         }
       });
@@ -23,15 +19,15 @@ export const policyController = {
 
   getPolicyDetails: async (req, res, next) => {
     try {
-      const { policyId } = req.params;
-      const policy = await policyService.getPolicyDetails(policyId);
+      const { policyNumber } = req.query;
+      const policy = await policyService.getPolicyDetails(policyNumber);
       
       if (!policy) {
         return res.status(404).json({
           success: false,
           error: {
             code: "POLICY_NOT_FOUND",
-            message: "No policy found with the provided ID."
+            message: "No policy found for the provided policy number."
           }
         });
       }

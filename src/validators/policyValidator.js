@@ -1,31 +1,20 @@
 import { z } from 'zod';
 
-const policySearchSchemaBase = z.object({
+const policySearchSchema = z.object({
   policyNumber: z.string().trim().max(50).optional(),
-  policyHolderName: z.string().trim().max(100).optional(),
-  status: z.enum(['active', 'expired', 'cancelled', 'pending']).optional(),
-  productType: z.string().trim().max(50).optional(),
-  startDateFrom: z.string().date().optional(),
-  startDateTo: z.string().date().optional(),
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  system: z.string().trim().max(100).optional(),
+  owner: z.string().trim().max(100).optional(),
+  dob: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format, must be YYYY-MM-DD').optional(),
+  ssn: z.string().trim().regex(/^\d{9}$/, 'Must be exactly 9 numeric digits').optional(),
+  status: z.string().trim().max(50).optional(),
+  product: z.string().trim().max(100).optional(),
+  agentCode: z.string().trim().max(50).optional()
+}).refine(data => Object.keys(data).length > 0, {
+  message: "At least one query parameter must be provided"
 });
 
-const policySearchSchema = policySearchSchemaBase
-  .refine(data => {
-    return data.policyNumber || data.policyHolderName || data.status || data.productType || data.startDateFrom || data.startDateTo;
-  }, { message: "At least one filter parameter must be provided" })
-  .refine(data => {
-    if (data.startDateFrom && data.startDateTo) {
-      return new Date(data.startDateTo) >= new Date(data.startDateFrom);
-    }
-    return true;
-  }, { message: "startDateTo must be >= startDateFrom", path: ["startDateTo"] });
-
 const policyDetailsSchema = z.object({
-  params: z.object({
-    policyId: z.string().uuid()
-  })
+  policyNumber: z.string().trim().min(1, 'policyNumber cannot be empty').max(50)
 });
 
 export const policyValidators = {
@@ -54,8 +43,8 @@ export const policyValidators = {
 
   validateDetails: (req, res, next) => {
     try {
-      const result = policyDetailsSchema.parse({ params: req.params });
-      req.params = result.params;
+      const result = policyDetailsSchema.parse(req.query);
+      req.query = result;
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
