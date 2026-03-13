@@ -119,23 +119,16 @@ export const policyService = {
       return null;
     }
 
-    // Map all matching rows into detail objects and return as a list
-    const results = rows.map(row => ({
-      policyNumber:       row.policy_number   || null,
-      ownerName:          row.owner_name      || null,
-      insurerName:        row.insurer_name    || null,
-      faceAmount:         row.face_amount     !== undefined ? Number(row.face_amount)      : null,
-      insuringAgent:      row.insuring_agent  || null,
-      policyStatus:       row.policy_status   || null,
-      typeOfCoverage:     row.type_of_coverage || null,
-      productName:        row.product_name    || null,
-      primaryBeneficiary: row.primary_beneficiary || null,
-      premiumAmount:      row.premium_amount  !== undefined ? Number(row.premium_amount)   : null,
-      premiumDueAmount:   row.premium_due_amount !== undefined ? Number(row.premium_due_amount) : null,
-      issueDate:          formatYYYYMMDD(row.issue_date),
-      issueAge:           row.issue_age       !== undefined ? parseInt(row.issue_age, 10)  : null
+    // Map all matching rows into PascalCase objects and return as a plain list
+    const Policies = rows.map(row => ({
+      PolicyNumber:  row.policy_number   || null,
+      InsuredName:   row.owner_name      || null, // Using owner_name as InsuredName for details
+      ProductName:   row.product_name    || null,
+      AgentCode:     row.insuring_agent  || null, // Using insuring_agent or something similar
+      EndDate:       formatYYYYMMDD(row.issue_date), // Placeholder for EndDate if not available
+      PremiumAmount: row.premium_amount  !== undefined ? Number(row.premium_amount) : null
     }));
 
-    return { total: results.length, results };
+    return { Policies };
   }
 };

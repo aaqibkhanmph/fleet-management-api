@@ -26,13 +26,7 @@ export const policyController = {
         });
       }
 
-      return res.status(200).json({
-        success: true,
-        data: {
-          total: data.total,
-          results: data.results
-        }
-      });
+      return res.status(200).json(data.Policies);
     } catch (error) {
       next(error);
     }
