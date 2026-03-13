@@ -3,7 +3,6 @@
 
 const MOCK_POLICIES = [
   {
-    // --- Search fields ---
     policy_number: 'POL-001',
     system: 'LEGACY-SYSTEM-A',
     owner: 'Alice Johnson',
@@ -12,7 +11,6 @@ const MOCK_POLICIES = [
     status: 'active',
     product: 'Term Life Guard',
     agent_code: 'AGT-101',
-    // --- Details fields ---
     owner_name: 'Alice Johnson',
     insurer_name: 'NorthStar Insurance Co.',
     face_amount: 750000,
@@ -27,7 +25,6 @@ const MOCK_POLICIES = [
     issue_age: 40
   },
   {
-    // --- Search fields ---
     policy_number: 'POL-002',
     system: 'CORE-SYSTEM-B',
     owner: 'Robert Smith',
@@ -36,7 +33,6 @@ const MOCK_POLICIES = [
     status: 'active',
     product: 'Whole Life Plus',
     agent_code: 'AGT-202',
-    // --- Details fields ---
     owner_name: 'Robert Smith',
     insurer_name: 'Summit Life Partners',
     face_amount: 1200000,
@@ -51,7 +47,6 @@ const MOCK_POLICIES = [
     issue_age: 44
   },
   {
-    // --- Search fields ---
     policy_number: 'POL-003',
     system: 'DIGITAL-PLATFORM',
     owner: 'Maria Garcia',
@@ -60,7 +55,6 @@ const MOCK_POLICIES = [
     status: 'pending',
     product: 'Universal Shield',
     agent_code: 'AGT-303',
-    // --- Details fields ---
     owner_name: 'Maria Garcia',
     insurer_name: 'Apex Life Insurance',
     face_amount: 500000,
@@ -85,17 +79,14 @@ export const pool = {
       return [[{ total: MOCK_POLICIES.length }], []];
     }
 
-    // Policy Details query — identified by selecting owner_name column
+    // Policy Details query — prefix match on policy_number
     if (queryStr.includes('owner_name')) {
       const policyNumber = (params && params[0]) || '';
-      const match = MOCK_POLICIES.find(p => p.policy_number === policyNumber);
-      if (match) {
-        return [[match], []];
-      }
-      return [[], []]; // Not found — triggers 404
+      const matches = MOCK_POLICIES.filter(p => p.policy_number.startsWith(policyNumber));
+      return [matches, []];
     }
 
-    // Policy Search — return all 3 mocks (service applies filter logic)
+    // Policy Search — return all mocks (service applies filter logic)
     return [MOCK_POLICIES, []];
   }
 };

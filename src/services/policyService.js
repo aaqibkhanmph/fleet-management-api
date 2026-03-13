@@ -6,7 +6,7 @@ function maskSsn(ssn) {
   if (str.length === 9) {
     return '***-**-' + str.slice(-4);
   }
-  return str; // Fallback if format is unexpected
+  return str;
 }
 
 function formatYYYYMMDD(val) {
@@ -75,7 +75,7 @@ export const policyService = {
     }
 
     const [rows] = await pool.query(query, params);
-    
+
     // Map DB snake_case columns to camelCase response
     const results = rows.map(row => ({
       policyNumber: row.policy_number || null,
@@ -97,6 +97,7 @@ export const policyService = {
   getPolicyDetails: async (policyNumber) => {
     const query = `
       SELECT 
+        p.policy_number,
         o.name AS owner_name,
         i.name AS insurer_name,
         p.face_amount,
@@ -114,37 +115,18 @@ export const policyService = {
       LEFT JOIN insurers i ON p.insurer_id = i.id
       LEFT JOIN products pr ON p.product_id = pr.id
       LEFT JOIN beneficiaries b ON b.policy_id = p.id AND b.is_primary = true
-      WHERE p.policy_number = ?
+      WHERE p.policy_number LIKE ?
     `;
 
     const [rows] = await pool.query(query, [policyNumber]);
 
     if (rows.length === 0) {
-      if (policyNumber && policyNumber.startsWith('POL')) {
-        return {
-          ownerName: "John Dummy Doe",
-          insurerName: "Mock Insurance Corp",
-          faceAmount: 500000,
-          insuringAgent: "Agent Smith",
-          policyStatus: "active",
-          typeOfCoverage: "Term Life",
-          productName: "Mock Life Guard",
-          primaryBeneficiary: "Jane Dummy Doe",
-          premiumAmount: 1200.50,
-          premiumDueAmount: 0,
-          issueDate: "2020-01-15",
-          issueAge: 35
-        };
-      }
       return null;
     }
 
-    // Aggregate results in the service layer
-    // For primaryBeneficiary, we will take the first match or if there are multiple rows due to 
-    // multiple primary beneficiaries we can join their names. Assuming 1 primary beneficiary per policy:
-    const row = rows[0];
-
-    return {
+    // Map all matching rows into detail objects and return as a list
+    const results = rows.map(row => ({
+      policyNumber: row.policy_number || null,
       ownerName: row.owner_name || null,
       insurerName: row.insurer_name || null,
       faceAmount: row.face_amount !== undefined ? Number(row.face_amount) : null,
@@ -157,6 +139,8 @@ export const policyService = {
       premiumDueAmount: row.premium_due_amount !== undefined ? Number(row.premium_due_amount) : null,
       issueDate: formatYYYYMMDD(row.issue_date),
       issueAge: row.issue_age !== undefined ? parseInt(row.issue_age, 10) : null
-    };
+    }));
+
+    return { total: results.length, results };
   }
 };
