@@ -6,11 +6,7 @@ export const policyController = {
       const data = await policyService.searchPolicies(req.query);
 
       return res.status(200).json({
-        success: true,
-        data: {
-          total: data.total,
-          results: data.results
-        }
+        Policies: data.Policies
       });
     } catch (error) {
       next(error);

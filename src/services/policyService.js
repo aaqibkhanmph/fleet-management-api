@@ -26,17 +26,17 @@ export const policyService = {
   searchPolicies: async (filters) => {
     let query = `
       SELECT 
-        p.policy_number, 
-        p.system, 
-        o.name AS owner, 
-        o.dob, 
-        o.ssn, 
-        p.status, 
-        pr.name AS product, 
-        p.agent_code 
+        p.policy_number,
+        p.insured_name,
+        p.product_name,
+        p.agent_code,
+        p.end_date,
+        p.premium_amount,
+        p.system,
+        p.dob,
+        p.ssn,
+        p.status
       FROM policies p
-      LEFT JOIN owners o ON p.owner_id = o.id
-      LEFT JOIN products pr ON p.product_id = pr.id
       WHERE 1=1
     `;
     const params = [];
@@ -50,15 +50,15 @@ export const policyService = {
       params.push(filters.system);
     }
     if (filters.owner) {
-      query += ' AND o.name = ?';
+      query += ' AND p.insured_name = ?';
       params.push(filters.owner);
     }
     if (filters.dob) {
-      query += ' AND o.dob = ?';
+      query += ' AND p.dob = ?';
       params.push(filters.dob);
     }
     if (filters.ssn) {
-      query += ' AND o.ssn = ?';
+      query += ' AND p.ssn = ?';
       params.push(filters.ssn);
     }
     if (filters.status) {
@@ -66,7 +66,7 @@ export const policyService = {
       params.push(filters.status);
     }
     if (filters.product) {
-      query += ' AND pr.name = ?';
+      query += ' AND p.product_name = ?';
       params.push(filters.product);
     }
     if (filters.agentCode) {
@@ -76,22 +76,17 @@ export const policyService = {
 
     const [rows] = await pool.query(query, params);
 
-    // Map DB snake_case columns to camelCase response
-    const results = rows.map(row => ({
-      policyNumber: row.policy_number || null,
-      system: row.system || null,
-      owner: row.owner || null,
-      dob: formatYYYYMMDD(row.dob),
-      ssn: maskSsn(row.ssn) || null,
-      status: row.status || null,
-      product: row.product || null,
-      agentCode: row.agent_code || null
+    // Map to PascalCase response structure
+    const Policies = rows.map(row => ({
+      PolicyNumber:  row.policy_number   || null,
+      InsuredName:   row.insured_name    || null,
+      ProductName:   row.product_name    || null,
+      AgentCode:     row.agent_code      || null,
+      EndDate:       row.end_date        || null,
+      PremiumAmount: row.premium_amount  !== undefined ? Number(row.premium_amount) : null
     }));
 
-    return {
-      total: results.length,
-      results
-    };
+    return { Policies };
   },
 
   getPolicyDetails: async (policyNumber) => {
@@ -126,19 +121,19 @@ export const policyService = {
 
     // Map all matching rows into detail objects and return as a list
     const results = rows.map(row => ({
-      policyNumber: row.policy_number || null,
-      ownerName: row.owner_name || null,
-      insurerName: row.insurer_name || null,
-      faceAmount: row.face_amount !== undefined ? Number(row.face_amount) : null,
-      insuringAgent: row.insuring_agent || null,
-      policyStatus: row.policy_status || null,
-      typeOfCoverage: row.type_of_coverage || null,
-      productName: row.product_name || null,
+      policyNumber:       row.policy_number   || null,
+      ownerName:          row.owner_name      || null,
+      insurerName:        row.insurer_name    || null,
+      faceAmount:         row.face_amount     !== undefined ? Number(row.face_amount)      : null,
+      insuringAgent:      row.insuring_agent  || null,
+      policyStatus:       row.policy_status   || null,
+      typeOfCoverage:     row.type_of_coverage || null,
+      productName:        row.product_name    || null,
       primaryBeneficiary: row.primary_beneficiary || null,
-      premiumAmount: row.premium_amount !== undefined ? Number(row.premium_amount) : null,
-      premiumDueAmount: row.premium_due_amount !== undefined ? Number(row.premium_due_amount) : null,
-      issueDate: formatYYYYMMDD(row.issue_date),
-      issueAge: row.issue_age !== undefined ? parseInt(row.issue_age, 10) : null
+      premiumAmount:      row.premium_amount  !== undefined ? Number(row.premium_amount)   : null,
+      premiumDueAmount:   row.premium_due_amount !== undefined ? Number(row.premium_due_amount) : null,
+      issueDate:          formatYYYYMMDD(row.issue_date),
+      issueAge:           row.issue_age       !== undefined ? parseInt(row.issue_age, 10)  : null
     }));
 
     return { total: results.length, results };
