@@ -3,19 +3,17 @@
 
 const MOCK_POLICIES = [
   {
-    // Search fields
-    policy_number: 'P54321',
+    policy_number: 'POL-001',
     system: 'LEGACY-SYSTEM-A',
-    insured_name: 'Insured3',
+    insured_name: 'Alice Johnson',
     dob: '1978-03-12',
     ssn: '111223333',
     status: 'active',
-    product_name: 'Product1',
-    agent_code: 'A003',
+    product_name: 'Term Life Guard',
+    agent_code: 'AGT-101',
     end_date: '20330223',
-    premium_amount: 234234.000000000,
-    // Details fields
-    owner_name: 'Insured3',
+    premium_amount: 1850,
+    owner_name: 'Alice Johnson',
     insurer_name: 'NorthStar Insurance Co.',
     face_amount: 750000,
     insuring_agent: 'Robert Blake',
@@ -27,19 +25,17 @@ const MOCK_POLICIES = [
     issue_age: 40
   },
   {
-    // Search fields
-    policy_number: 'P12345',
+    policy_number: 'POL-002',
     system: 'CORE-SYSTEM-B',
-    insured_name: 'Insured1',
+    insured_name: 'Robert Smith',
     dob: '1965-11-28',
     ssn: '222334444',
     status: 'active',
-    product_name: 'Product1',
-    agent_code: 'A001',
+    product_name: 'Whole Life Plus',
+    agent_code: 'AGT-202',
     end_date: '20270223',
-    premium_amount: 12345.000000000,
-    // Details fields
-    owner_name: 'Insured1',
+    premium_amount: 3400.75,
+    owner_name: 'Robert Smith',
     insurer_name: 'Summit Life Partners',
     face_amount: 1200000,
     insuring_agent: 'Diana Prince',
@@ -51,19 +47,17 @@ const MOCK_POLICIES = [
     issue_age: 44
   },
   {
-    // Search fields
-    policy_number: 'P67890',
+    policy_number: 'POL-003',
     system: 'DIGITAL-PLATFORM',
-    insured_name: 'Insured2',
+    insured_name: 'Maria Garcia',
     dob: '1990-07-04',
     ssn: '333445555',
     status: 'pending',
-    product_name: 'Product2',
-    agent_code: 'A002',
+    product_name: 'Universal Shield',
+    agent_code: 'AGT-303',
     end_date: '20290221',
-    premium_amount: 23423.000000000,
-    // Details fields
-    owner_name: 'Insured2',
+    premium_amount: 980.5,
+    owner_name: 'Maria Garcia',
     insurer_name: 'Apex Life Insurance',
     face_amount: 500000,
     insuring_agent: 'James Carver',
