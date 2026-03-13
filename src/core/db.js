@@ -7,45 +7,46 @@ export const pool = {
   query: async (queryStr, params) => {
     console.log(`[MOCK DB] Executing query: ${queryStr}`);
     console.log(`[MOCK DB] With params:`, params);
-    
+
     if (queryStr.includes('COUNT(*)')) {
       return [[{ total: 1 }], []];
     }
-    
-    if (queryStr.includes('JOIN')) {
-      // Policy Details with Nominees and Riders
-      return [[
-        {
-          policyId: params[0] || '123e4567-e89b-12d3-a456-426614174000',
-          policyNumber: 'POL-987654321',
-          status: 'active',
-          productType: 'Comprehensive Auto',
-          policyHolderName: 'Jane Doe',
-          startDate: '2025-01-01',
-          endDate: '2026-01-01',
-          premium: 1200.50,
-          sumAssured: 50000.00,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          nomineeName: 'John Doe',
-          nomineeRelationship: 'Spouse',
-          nomineeShare: 100,
-          riderName: 'Zero Depreciation'
-        }
-      ], []];
+
+    // Policy Details query — detect by selecting owner_name column
+    if (queryStr.includes('owner_name')) {
+      const policyNumber = (params && params[0]) || '';
+      if (policyNumber.startsWith('POL')) {
+        return [[
+          {
+            owner_name: 'John Dummy Doe',
+            insurer_name: 'Mock Insurance Corp',
+            face_amount: 500000,
+            insuring_agent: 'Agent Smith',
+            policy_status: 'active',
+            type_of_coverage: 'Term Life',
+            product_name: 'Mock Life Guard',
+            premium_amount: 1200.50,
+            premium_due_amount: 0,
+            issue_date: '2020-01-15',
+            issue_age: 35,
+            primary_beneficiary: 'Jane Dummy Doe'
+          }
+        ], []];
+      }
+      return [[], []]; // Not found — triggers 404
     }
 
-    // Policy Search List
+    // Policy Search List — return columns matching policyService.js expectations
     return [[
       {
-        policyId: '123e4567-e89b-12d3-a456-426614174000',
-        policyNumber: 'POL-987654321',
-        policyHolderName: 'Jane Doe',
-        productType: 'Comprehensive Auto',
+        policy_number: 'POL-987654321',
+        system: 'LEGACY-SYSTEM',
+        owner: 'Jane Doe',
+        dob: '1990-05-20',
+        ssn: '987654321',
         status: 'active',
-        startDate: '2025-01-01',
-        endDate: '2026-01-01',
-        premium: 1200.50
+        product: 'Comprehensive Auto',
+        agent_code: 'AGT-001'
       }
     ], []];
   }
