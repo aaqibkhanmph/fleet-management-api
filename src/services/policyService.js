@@ -89,9 +89,9 @@ export const policyService = {
     }));
 
     // Add dummy data for testing if specifically requested or no results found
-    if (filters.policyNumber === 'POL-12345') {
+    if (filters.policyNumber && filters.policyNumber.startsWith('POL')) {
       results.unshift({
-        policyNumber: "POL-12345",
+        policyNumber: filters.policyNumber,
         system: "MOCK-SYSTEM",
         owner: "John Dummy Doe",
         dob: "1985-10-25",
@@ -134,7 +134,7 @@ export const policyService = {
     const [rows] = await pool.query(query, [policyNumber]);
 
     if (rows.length === 0) {
-      if (policyNumber === 'POL-12345') {
+      if (policyNumber && policyNumber.startsWith('POL')) {
         return {
           ownerName: "John Dummy Doe",
           insurerName: "Mock Insurance Corp",
