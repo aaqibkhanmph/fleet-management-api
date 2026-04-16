@@ -24,57 +24,63 @@ function formatYYYYMMDD(val) {
 
 export const policyService = {
   searchPolicies: async (filters) => {
-    let query = `
-      SELECT 
-        p.policy_number,
-        p.insured_name,
-        p.product_name,
-        p.agent_code,
-        p.end_date,
-        p.premium_amount,
-        p.system,
-        p.dob,
-        p.ssn,
-        p.status
-      FROM policies p
-      WHERE 1=1
-    `;
-    const params = [];
+    // In a real application, we would build a SQL query and let the DB handle filtering.
+    // However, since we are using a mock DB that returns all records, 
+    // we implement the filtering logic here in the service layer.
+    
+    let [rows] = await pool.query('SELECT * FROM policies', []);
 
+    // Apply filtering logic
     if (filters.policyNumber) {
-      query += ' AND p.policy_number = ?';
-      params.push(filters.policyNumber);
-    }
-    if (filters.system) {
-      query += ' AND p.system = ?';
-      params.push(filters.system);
-    }
-    if (filters.owner) {
-      query += ' AND p.insured_name = ?';
-      params.push(filters.owner);
-    }
-    if (filters.dob) {
-      query += ' AND p.dob = ?';
-      params.push(filters.dob);
-    }
-    if (filters.ssn) {
-      query += ' AND p.ssn = ?';
-      params.push(filters.ssn);
-    }
-    if (filters.status) {
-      query += ' AND p.status = ?';
-      params.push(filters.status);
-    }
-    if (filters.product) {
-      query += ' AND p.product_name = ?';
-      params.push(filters.product);
-    }
-    if (filters.agentCode) {
-      query += ' AND p.agent_code = ?';
-      params.push(filters.agentCode);
+      const pn = filters.policyNumber.toLowerCase();
+      rows = rows.filter(row => row.policy_number.toLowerCase().includes(pn));
     }
 
-    const [rows] = await pool.query(query, params);
+    if (filters.system) {
+      rows = rows.filter(row => row.system === filters.system);
+    }
+
+    if (filters.owner) {
+      const owner = filters.owner.toLowerCase();
+      rows = rows.filter(row => row.insured_name.toLowerCase().includes(owner));
+    }
+
+    if (filters.dob) {
+      rows = rows.filter(row => row.dob === filters.dob);
+    }
+
+    if (filters.ssn) {
+      rows = rows.filter(row => row.ssn === filters.ssn);
+    }
+
+    if (filters.status) {
+      rows = rows.filter(row => row.status === filters.status);
+    }
+
+    if (filters.product) {
+      const product = filters.product.toLowerCase();
+      rows = rows.filter(row => row.product_name.toLowerCase().includes(product));
+    }
+
+    if (filters.agentCode) {
+      rows = rows.filter(row => row.agent_code === filters.agentCode);
+    }
+
+    if (filters.minPremium !== undefined) {
+      rows = rows.filter(row => Number(row.premium_amount) >= filters.minPremium);
+    }
+
+    if (filters.maxPremium !== undefined) {
+      rows = rows.filter(row => Number(row.premium_amount) <= filters.maxPremium);
+    }
+
+    if (filters.startDate) {
+      rows = rows.filter(row => row.issue_date >= filters.startDate);
+    }
+
+    if (filters.endDate) {
+      rows = rows.filter(row => row.issue_date <= filters.endDate);
+    }
 
     // Map to PascalCase response structure
     const Policies = rows.map(row => ({
