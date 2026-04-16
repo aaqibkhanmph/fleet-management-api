@@ -8,7 +8,11 @@ const policySearchSchema = z.object({
   ssn: z.string().trim().regex(/^\d{9}$/, 'Must be exactly 9 numeric digits').optional(),
   status: z.string().trim().max(50).optional(),
   product: z.string().trim().max(100).optional(),
-  agentCode: z.string().trim().max(50).optional()
+  agentCode: z.string().trim().max(50).optional(),
+  minPremium: z.string().optional().transform(v => v ? Number(v) : undefined),
+  maxPremium: z.string().optional().transform(v => v ? Number(v) : undefined),
+  startDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  endDate: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/).optional()
 }).refine(data => Object.keys(data).length > 0, {
   message: "At least one query parameter must be provided"
 });
